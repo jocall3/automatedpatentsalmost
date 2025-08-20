@@ -1,19 +1,18 @@
 
+
 import React, { useState } from 'react';
 import { UploadIcon, SparklesIcon, DocumentIcon, XCircleIcon } from './Icons';
 
 interface DataInputProps {
-    onProcess: (data: string, subject: string, style: string) => void;
+    onProcess: (data: string) => void;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file
 const MAX_TOTAL_SIZE = 100 * 1024 * 1024; // 100 MB total
-const HARDCODED_SUBJECT = "An addendum to an MIT textbook on Quantum Computation & Information Systems, detailing the creation of a quantum programming language based on the principles of 'Braided Logic Systems'.";
 
 
 const DataInput: React.FC<DataInputProps> = ({ onProcess }) => {
     const [files, setFiles] = useState<File[]>([]);
-    const [style, setStyle] = useState<string>('technical diagrams, blueprints, academic, minimalist');
     const [isParsing, setIsParsing] = useState(false);
     const [dragActive, setDragActive] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -108,7 +107,7 @@ const DataInput: React.FC<DataInputProps> = ({ onProcess }) => {
                  setIsParsing(false);
                  return;
             }
-            onProcess(combinedText, HARDCODED_SUBJECT, style);
+            onProcess(combinedText);
         } catch (err) {
             console.error("Failed to parse files", err);
             setError("Could not read one or more files. They might be corrupted or protected.");
@@ -124,7 +123,7 @@ const DataInput: React.FC<DataInputProps> = ({ onProcess }) => {
                 <UploadIcon className="mx-auto h-16 w-16 text-violet-400 mb-4" />
                 <h2 className="text-2xl font-bold text-white mb-2">Provide Source Material</h2>
                 <p className="text-gray-400 mb-6">
-                    Upload documents to serve as inspiration and set an illustration style. The AI will generate a complete, illustrated textbook chapter on creating a quantum programming language.
+                    Upload documents to serve as inspiration. The AI will analyze your content and generate a complete, illustrated textbook chapter on the subject.
                 </p>
                 
                 <form onSubmit={handleSubmit} className="w-full space-y-4">
@@ -156,18 +155,6 @@ const DataInput: React.FC<DataInputProps> = ({ onProcess }) => {
                         <input id="file-upload" type="file" multiple className="hidden" onChange={handleChange} accept="application/pdf,text/plain" />
                     </label>
                     
-                    <div>
-                         <label htmlFor="style-input" className="block text-left text-sm font-medium text-gray-300 mb-1">Illustration Style</label>
-                         <input
-                            id="style-input"
-                            type="text"
-                            value={style}
-                            onChange={(e) => setStyle(e.target.value)}
-                            className="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 placeholder:text-gray-500"
-                            placeholder="e.g., technical diagrams, blueprints, academic, minimalist"
-                         />
-                    </div>
-
                     {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
 
                     <button

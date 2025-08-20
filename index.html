@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script>
       window.MathJax = {
         tex: {
@@ -25,11 +26,11 @@
       body {
         font-family: 'Inter', sans-serif;
       }
-      .textbook-preview {
+      .book-preview {
         font-family: 'Lora', serif;
         color: #e5e7eb; /* gray-200 */
       }
-      .textbook-preview h1 {
+      .book-preview h1 {
         font-family: 'Inter', sans-serif;
         font-weight: 800;
         font-size: 2.5rem;
@@ -39,7 +40,7 @@
         padding-bottom: 1.5rem;
         line-height: 1.2;
       }
-      .textbook-preview h2 {
+      .book-preview h2 {
         font-family: 'Inter', sans-serif;
         font-weight: 700;
         font-size: 1.75rem;
@@ -47,13 +48,13 @@
         margin-bottom: 1.5rem;
         color: #a78bfa; /* violet-400 */
       }
-      .textbook-preview p {
+      .book-preview p {
         line-height: 1.8;
         font-size: 1.125rem;
         margin-bottom: 1.25rem;
         text-align: justify;
       }
-      .textbook-preview figure {
+      .book-preview figure {
           margin-top: 1.5rem;
           margin-bottom: 2rem;
           border: 1px solid #4a5568; /* gray-600 */
@@ -61,12 +62,12 @@
           overflow: hidden;
           background-color: #374151; /* gray-700 */
       }
-      .textbook-preview figure img {
+      .book-preview figure img {
           width: 100%;
           height: auto;
           display: block;
       }
-      .textbook-preview figcaption {
+      .book-preview figcaption {
           padding: 0.75rem 1rem;
           font-size: 0.9rem;
           font-style: italic;
@@ -74,7 +75,7 @@
           text-align: center;
           background-color: #1f2937; /* gray-800 */
       }
-      .textbook-preview .header-image {
+      .book-preview .header-image {
           width: 100%;
           height: auto;
           max-height: 350px;

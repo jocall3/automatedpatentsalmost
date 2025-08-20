@@ -4,11 +4,12 @@ import React, { useState, useEffect } from 'react';
 import type { TextbookDocument, AppState, RobotState } from './types';
 import * as gemini from './services/geminiService';
 import { createPdf } from './services/pdfService';
+import { createPptx } from './services/pptxService';
 import { APP_TITLE } from './constants';
 import { BookOpenIcon, DownloadIcon, BackArrowIcon, SparklesIcon } from './components/Icons';
 import Loader from './components/Loader';
 import DataInput from './components/DataInput';
-import TextbookPreview from './components/MagazinePreview';
+import BookPreview from './components/BookPreview';
 import Robot from './components/Robot';
 
 const App: React.FC = () => {
@@ -56,7 +57,7 @@ const App: React.FC = () => {
         }
     };
 
-    const handleGenerateTextbook = async (sourceMaterial: string, subject: string, style: string) => {
+    const handleGenerateTextbook = async (sourceMaterial: string) => {
         handleReset();
         setAppState('GENERATING');
         setIsLoading(true);
@@ -66,13 +67,18 @@ const App: React.FC = () => {
         let currentDoc: TextbookDocument | null = null;
 
         try {
+            setLoadingMessage('Analyzing source material to determine the subject...');
+            const subject = await gemini.inferSubject(sourceMaterial);
+            
+            setLoadingMessage('Creating visual summary for illustrations...');
+            const imageContextSummary = await gemini.summarizeForImageContext(sourceMaterial);
+
             setLoadingMessage('Generating textbook outline...');
-            const outline = await gemini.generateTextbookOutline(sourceMaterial, subject, style);
+            const outline = await gemini.generateTextbookOutline(sourceMaterial, subject);
 
             const initialDoc: TextbookDocument = {
                 id: crypto.randomUUID(),
                 title: outline.title,
-                style: style,
                 sections: outline.sections.map(s => ({
                     id: crypto.randomUUID(),
                     section_number: s.section_number,
@@ -90,7 +96,7 @@ const App: React.FC = () => {
 
             setLoadingMessage('Generating chapter header illustration...');
             setRobotState('illustrating');
-            const headerImageUrl = await gemini.generateHeaderImage(outline.title, style);
+            const headerImageUrl = await gemini.generateHeaderImage(outline.title, imageContextSummary);
 
             if (currentDoc) {
                 currentDoc = { ...currentDoc, headerImageUrl };
@@ -102,7 +108,7 @@ const App: React.FC = () => {
                 setLoadingMessage(`Writing section ${i + 1} of ${initialDoc.sections.length}...`);
                 setRobotState('writing');
 
-                const stream = await gemini.generateSectionTextStream(section.summary!, outline.title, subject, style, section.title, section.section_number);
+                const stream = await gemini.generateSectionTextStream(sourceMaterial, section.summary!, outline.title, subject, section.title, section.section_number);
                 
                 let fullText = '';
                 for await (const chunk of stream) {
@@ -117,7 +123,7 @@ const App: React.FC = () => {
 
                 setLoadingMessage(`Generating diagram for section ${i + 1}...`);
                 setRobotState('illustrating');
-                const imageUrl = await gemini.generateDiagramImage(fullText, style);
+                const imageUrl = await gemini.generateDiagramImage(fullText);
                 if (imageUrl && currentDoc) {
                    const newDoc = JSON.parse(JSON.stringify(currentDoc));
                    newDoc.sections[i].images.push(imageUrl);
@@ -158,6 +164,23 @@ const App: React.FC = () => {
             setLoadingMessage('');
         }
     };
+
+    const handlePptxDownload = async () => {
+        if (!textbookDocument) return;
+        setIsLoading(true);
+        setLoadingMessage('Generating your PowerPoint presentation...');
+        setRobotState('thinking');
+        try {
+            await createPptx(textbookDocument);
+        } catch (err) {
+            console.error(err);
+            setError('Failed to create the PowerPoint file.');
+        } finally {
+            setIsLoading(false);
+            setRobotState('idle');
+            setLoadingMessage('');
+        }
+    };
     
     const renderContent = () => {
         if (appState === 'GENERATING' || (isLoading && appState !== 'VIEWING')) {
@@ -169,7 +192,7 @@ const App: React.FC = () => {
             case 'VIEWING':
                 return textbookDocument ? (
                     <div className="h-[85vh] overflow-y-auto relative">
-                        <TextbookPreview doc={textbookDocument} />
+                        <BookPreview doc={textbookDocument} />
                         {loadingMessage && (
                            <div className="sticky bottom-4 w-11/12 mx-auto bg-gray-900/80 backdrop-blur-sm border border-gray-700 p-3 rounded-lg text-center text-sm z-20 flex items-center justify-center gap-2">
                                 <SparklesIcon className="w-5 h-5 text-violet-400 animate-pulse" />
@@ -197,6 +220,14 @@ const App: React.FC = () => {
                         </div>
                          {appState !== 'INPUT' && (
                              <div className="flex items-center gap-4">
+                                <button 
+                                    onClick={handlePptxDownload}
+                                    disabled={isLoading}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+                                >
+                                    <DownloadIcon className="w-4 h-4"/>
+                                    <span>Export PPTX</span>
+                                </button>
                                 <button 
                                     onClick={handlePdfDownload}
                                     disabled={isLoading}

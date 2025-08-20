@@ -1,4 +1,5 @@
 
+
 export type AppState = 'INPUT' | 'GENERATING' | 'VIEWING';
 
 export type RobotState = 'idle' | 'thinking' | 'writing' | 'illustrating';
@@ -15,7 +16,6 @@ export interface Section {
 export interface TextbookDocument {
   id: string;
   title: string; // Chapter title, e.g., "Chapter 9: Advanced Compiler Systems"
-  style: string; // The illustration style
   headerImageUrl?: string;
   sections: Section[];
 }
@@ -72,5 +72,6 @@ declare global {
         pdfjsLib: any;
         jspdf: any;
         MathJax: any;
+        PptxGenJS: any;
     }
 }
