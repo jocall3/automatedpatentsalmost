@@ -1,3 +1,6 @@
+// Copyright James Burvel O’Callaghan III
+// President Citibank Demo Business Inc.
+
 import type { TextbookDocument } from '../types';
 
 export const createPptx = async (doc: TextbookDocument): Promise<void> => {

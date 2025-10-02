@@ -1,3 +1,6 @@
+// Copyright James Burvel O’Callaghan III
+// President Citibank Demo Business Inc.
+
 
 
 export type AppState = 'INPUT' | 'GENERATING' | 'VIEWING';
